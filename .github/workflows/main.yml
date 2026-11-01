@@ -28,6 +28,7 @@ jobs:
           if [ -f "onushilon_flutter_app/pubspec.yaml" ]; then
             cd onushilon_flutter_app
           fi
+          python3 -c 'import glob; [open(f,"w").write(open(f).read().replace("replaceAll(\x27$$\x27, \x27\x27).replaceAll(\x27$\x27, \x27\x27)", "replaceAll(r\x27$$\x27, \x27\x27).replaceAll(r\x27$\x27, \x27\x27)").replace("Icons.Adjust_rounded", "Icons.adjust_rounded")) for f in glob.glob("lib/**/*.dart", recursive=True)]'
           rm -rf android ios web linux macos windows test
           flutter create . --project-name onushilon --org com.onushilon
           python3 -c 'p="android/app/src/main/AndroidManifest.xml"; s=open(p).read(); s=s.replace("<application", "<uses-permission android:name=\"android.permission.INTERNET\"/>\n    <uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\"/>\n    <application", 1) if "android.permission.INTERNET" not in s else s; s=s.replace("android:label=\"onushilon\"", "android:label=\"অনুশীলন\""); open(p,"w").write(s)'
