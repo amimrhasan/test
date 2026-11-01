@@ -31,16 +31,19 @@ jobs:
           python3 -c 'import pathlib; [p.write_text(p.read_text(encoding="utf-8").replace("replaceAll(\x27$$\x27, \x27\x27).replaceAll(\x27$\x27, \x27\x27)", "replaceAll(r\x27$$\x27, \x27\x27).replaceAll(r\x27$\x27, \x27\x27)").replace("Icons.Adjust_rounded", "Icons.adjust_rounded"), encoding="utf-8") for p in pathlib.Path("lib").rglob("*.dart")]'
           rm -rf android ios web linux macos windows test
           flutter create . --project-name onushilon --org com.onushilon
-          python3 -c 'import pathlib; p=pathlib.Path("android/app/src/main/AndroidManifest.xml"); s=p.read_text(encoding="utf-8"); s=s.replace("<application", "<uses-permission android:name=\"android.permission.INTERNET\"/>\n    <uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\"/>\n    <application", 1) if "android.permission.INTERNET" not in s else s; s=s.replace("android:label=\"onushilon\"", "android:label=\"অনুশীলন\""); p.write_text(s, encoding="utf-8")'
+          python3 -c 'import pathlib; p=pathlib.Path("android/app/src/main/AndroidManifest.xml"); s=p.read_text(encoding="utf-8"); s=s.replace("<application", "<uses-permission android:name=\"android.permission.INTERNET\"/>\n    <uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\"/>\n    <application\n        android:extractNativeLibs=\"true\"", 1) if "android.permission.INTERNET" not in s else s; s=s.replace("android:label=\"onushilon\"", "android:label=\"অনুশীলন\""); p.write_text(s, encoding="utf-8")'
           flutter pub get
           dart run flutter_launcher_icons || true
           python3 -c 'import os, re, pathlib; roots=[pathlib.Path("android"), pathlib.Path.home()/".pub-cache"] + ([pathlib.Path(os.environ["PUB_CACHE"])] if "PUB_CACHE" in os.environ else []); [p.write_text(re.sub(r"\bcompileSdk(?:Version)?\s*=?\s*(?:3[0-5]|flutter\.compileSdkVersion)\b", "compileSdk = 36" if p.name.endswith(".kts") else "compileSdkVersion 36", p.read_text(encoding="utf-8")), encoding="utf-8") for r in roots if r.exists() for p in r.rglob("build.gradle*")]'
+          python3 -c 'import re, pathlib; [p.write_text(re.sub(r"minSdk\s*=\s*[^\n]+", "minSdk = 21", re.sub(r"targetSdk\s*=\s*[^\n]+", "targetSdk = 34", re.sub(r"applicationId\s*=\s*\"[^\"]+\"", "applicationId = \"com.onushilon.mcqapp\"", p.read_text(encoding="utf-8")))).replace("defaultConfig {", "packaging {\n        jniLibs {\n            useLegacyPackaging = true\n        }\n    }\n    defaultConfig {", 1), encoding="utf-8") for p in pathlib.Path("android/app").glob("build.gradle*")]'
+          flutter build apk --release --split-per-abi
           flutter build apk --release
           mkdir -p "$GITHUB_WORKSPACE/apk_out"
-          cp build/app/outputs/flutter-apk/app-release.apk "$GITHUB_WORKSPACE/apk_out/Onushilon-v1.0.0.apk"
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk "$GITHUB_WORKSPACE/apk_out/Onushilon-arm64-v1.0.0.apk"
+          cp build/app/outputs/flutter-apk/app-release.apk "$GITHUB_WORKSPACE/apk_out/Onushilon-Universal-v1.0.0.apk"
 
       - name: Upload Release APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Onushilon-Release-APK
-          path: apk_out/Onushilon-v1.0.0.apk
+          path: apk_out/*.apk
