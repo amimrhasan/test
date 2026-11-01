@@ -34,6 +34,7 @@ jobs:
           python3 -c 'import pathlib; p=pathlib.Path("android/app/src/main/AndroidManifest.xml"); s=p.read_text(encoding="utf-8"); s=s.replace("<application", "<uses-permission android:name=\"android.permission.INTERNET\"/>\n    <uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\"/>\n    <application", 1) if "android.permission.INTERNET" not in s else s; s=s.replace("android:label=\"onushilon\"", "android:label=\"অনুশীলন\""); p.write_text(s, encoding="utf-8")'
           flutter pub get
           dart run flutter_launcher_icons || true
+          python3 -c 'import os, re, pathlib; roots=[pathlib.Path("android"), pathlib.Path.home()/".pub-cache"] + ([pathlib.Path(os.environ["PUB_CACHE"])] if "PUB_CACHE" in os.environ else []); [p.write_text(re.sub(r"\bcompileSdk(?:Version)?\s*=?\s*(?:3[0-5]|flutter\.compileSdkVersion)\b", "compileSdk = 36" if p.name.endswith(".kts") else "compileSdkVersion 36", p.read_text(encoding="utf-8")), encoding="utf-8") for r in roots if r.exists() for p in r.rglob("build.gradle*")]'
           flutter build apk --release
           mkdir -p "$GITHUB_WORKSPACE/apk_out"
           cp build/app/outputs/flutter-apk/app-release.apk "$GITHUB_WORKSPACE/apk_out/Onushilon-v1.0.0.apk"
