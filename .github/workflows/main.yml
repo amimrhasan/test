@@ -28,7 +28,9 @@ jobs:
           if [ -f "onushilon_flutter_app/pubspec.yaml" ]; then
             cd onushilon_flutter_app
           fi
+          rm -rf android ios web linux macos windows test
           flutter create . --project-name onushilon --org com.onushilon
+          python3 -c 'p="android/app/src/main/AndroidManifest.xml"; s=open(p).read(); s=s.replace("<application", "<uses-permission android:name=\"android.permission.INTERNET\"/>\n    <uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\"/>\n    <application", 1) if "android.permission.INTERNET" not in s else s; s=s.replace("android:label=\"onushilon\"", "android:label=\"অনুশীলন\""); open(p,"w").write(s)'
           flutter pub get
           dart run flutter_launcher_icons || true
           flutter build apk --release
